@@ -1,0 +1,20 @@
+.register-content {
+  .ant-registered-login {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 145%;
+    background-color: #aa0daf;
+    font-weight: bold;
+    margin-left: -100px;
+  }
+
+  .back-wrapper {
+    text-align: end;
+    .back {
+      font-size: 13px;
+      color: #aa0daf;
+      display: flex;
+    }
+  }
+}
