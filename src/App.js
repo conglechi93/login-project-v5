@@ -13,6 +13,7 @@ function App() {
     setIsLoginPage(false);
   };
   const handleChangeToLogin = () => {
+    console.log("Change to login");
     setIsLoginPage(true);
   };
 
