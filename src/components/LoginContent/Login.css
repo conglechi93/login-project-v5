@@ -44,8 +44,16 @@
     background-color: #aa0daf;
     font-weight: bold;
     margin-top: -40px;
-    &:hover {
-      /* background-color: #aa0daf !important; */
-    }
   }
 }
+.registered {
+  font-size: 10px;
+  color: #888585;
+}
+
+.create {
+  font-size: 10px;
+  color: #aa0daf;
+  text-decoration: none;
+}
+

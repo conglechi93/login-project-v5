@@ -1,9 +1,9 @@
 import { Button, Form, Input } from "antd";
 
-const Register = ({ handleChangeToLogin }) => {
+const Register = ({ handleChangeToLogin}) => {
   return (
     <div className="register-content">
-      <p>Register</p>
+      <p className="register-now">Register</p>
       <Form
         name="wrap"
         labelAlign="left"
