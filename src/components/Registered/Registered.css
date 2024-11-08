@@ -25,8 +25,7 @@
   .back-wrapper {
     text-align: end;
     .back {
-      z-index: 100;
-      font-size: 13px;
+      font-size: 12px;
       color: #aa0daf;
       text-decoration: none;
     }
