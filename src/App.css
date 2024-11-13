@@ -33,8 +33,8 @@
   }
 }
 
-  @media (max-width: 768px) {
-  .content {
+  @media screen and (max-width: 768px) {
+  .container {
     flex-direction: column;
     width: 90%;
     height: auto;
