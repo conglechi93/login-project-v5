@@ -7,6 +7,7 @@ import Register from "./components/Registered/Registered";
 import "./components/Registered/Registered.css";
 import LoginContent from "./components/LoginContent/Login";
 import "./components/LoginContent/Login.css";
+import Users from "./components/Users";
 function App() {
   const [isLoginPage, setIsLoginPage] = React.useState(true);
   const handleChangeToRegister = () => {
@@ -16,6 +17,8 @@ function App() {
     console.log("Change to login");
     setIsLoginPage(true);
   };
+
+  return <Users />;
 
   return (
     <div className="content">
