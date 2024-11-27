@@ -4,6 +4,7 @@ import React from "react";
 import "./user.css";
 import UserDelete from "./UserDelete";
 import UserViewDetail from "./UserViewDetail";
+import UserEdit from "./UserEdit";
 
 const Users = () => {
   const [dataSource, setDataSource] = React.useState([
@@ -16,6 +17,7 @@ const Users = () => {
       address: "New York No. 1 Lake Park",
     },
   ]);
+  const [editingRecord, setEditingRecord] = React.useState(null);
 
   const [modalProps, setModalProps] = React.useState({});
 
@@ -56,17 +58,21 @@ const Users = () => {
             }}
           >
             <EyeOutlined />
-          </Button>
-          <Button>
+          </Button>{" "}
+          <Button
+            onClick={() => {
+              handleEditUser(record);
+            }}
+          >
             <EditOutlined />
-          </Button>
+          </Button>{" "}
           <Button
             onClick={() => {
               handleDeleteUser(record);
             }}
           >
             <DeleteOutlined />
-          </Button>
+          </Button>{" "}
         </Flex>
       ),
     },
@@ -77,18 +83,47 @@ const Users = () => {
       open: true,
       title: "Add User",
       onCancel: () => {
-        setModalProps({ open: false });
+        setModalProps({
+          open: false,
+        });
       },
-      children: <div>hello</div>,
+      children: <div> hello </div>,
     });
   };
 
+  const handleEditUser = (record) => {
+    setEditingRecord(record); // Cập nhật giá trị record đang chỉnh sửa
+    setModalProps({
+      open: true,
+      title: "Edit User",
+      okText: "Save",
+      onCancel: () =>
+        setModalProps({
+          open: false,
+        }),
+      onOk: () => {
+        const updatedData = dataSource.map((user) =>
+          user.key === record.key ? { ...user, ...editingRecord } : user
+        );
+        setDataSource(updatedData);
+        setModalProps({ open: false });
+      },
+      children: (
+        <UserEdit
+          record={record}
+          onChange={(newRecord) => setEditingRecord(newRecord)}
+        />
+      ),
+    });
+  };
   const handleDeleteUser = (record) => {
     setModalProps({
       open: true,
       title: "Delete User",
       onCancel: () => {
-        setModalProps({ open: false });
+        setModalProps({
+          open: false,
+        });
       },
       children: <UserDelete record={record} />,
     });
@@ -97,7 +132,12 @@ const Users = () => {
     setModalProps({
       open: true,
       title: "View Detail User",
-      onCancel: () => {
+      okText: "Save",
+      onCancel: () =>
+        setModalProps({
+          open: false,
+        }),
+      onOk: () => {
         setModalProps({ open: false });
       },
       children: <UserViewDetail record={record} />,
