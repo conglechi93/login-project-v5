@@ -1,10 +1,21 @@
 import { DeleteOutlined, EditOutlined, EyeOutlined } from "@ant-design/icons";
-import { Button, Col, Flex, Modal, Row, Space, Table } from "antd";
-import React from "react";
+import {
+  Button,
+  Col,
+  Flex,
+  message,
+  Modal,
+  Row,
+  Space,
+  Table,
+  Input,
+} from "antd";
+import React, { useEffect } from "react";
 import "./user.css";
 import UserDelete from "./UserDelete";
 import UserViewDetail from "./UserViewDetail";
 import UserEdit from "./UserEdit";
+import axios from "axios";
 
 const Users = () => {
   const [dataSource, setDataSource] = React.useState([
@@ -17,6 +28,7 @@ const Users = () => {
       address: "New York No. 1 Lake Park",
     },
   ]);
+  const [searchTerm, setSearchTerm] = React.useState("");
   const [editingRecord, setEditingRecord] = React.useState(null);
 
   const [modalProps, setModalProps] = React.useState({});
@@ -77,6 +89,37 @@ const Users = () => {
       ),
     },
   ];
+  const fetchUsers = async (search = "") => {
+    try {
+      const response = await axios.get("http://localhost:8080/users", {
+        params: {
+          search: search,
+        },
+      });
+      console.log(response.data);
+
+      const data = response.data.map((user, index) => ({
+        key: index + 1,
+        id: user.id,
+        name: user.name,
+        phone: user.phone,
+        age: user.age,
+        address: user.address,
+      }));
+
+      setDataSource(data);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+    }
+  };
+
+  const handleSearch = () => {
+    fetchUsers(searchTerm);
+  };
+
+  useEffect(() => {
+    fetchUsers();
+  }, []);
 
   const handleAddUser = () => {
     setModalProps({
@@ -92,7 +135,7 @@ const Users = () => {
   };
 
   const handleEditUser = (record) => {
-    setEditingRecord(record); // Cập nhật giá trị record đang chỉnh sửa
+    setEditingRecord(record);
     setModalProps({
       open: true,
       title: "Edit User",
@@ -120,19 +163,33 @@ const Users = () => {
     setModalProps({
       open: true,
       title: "Delete User",
-      onCancel: () => {
+      okText: "OK",
+      onCancel: () =>
         setModalProps({
           open: false,
-        });
-      },
+        }),
       children: <UserDelete record={record} />,
+      onOk: async () => {
+        const response = await axios.delete(
+          `http://localhost:8080/users/${record.id}`
+        );
+        console.log("response", response);
+        const status = response.status;
+        if (status === 200) {
+          message.success("Delete successfully");
+          fetchUsers();
+        } else {
+          message.error("Delete failed");
+        }
+        setModalProps({ open: false });
+      },
     });
   };
   const handleViewDetailUser = (record) => {
     setModalProps({
       open: true,
       title: "View Detail User",
-      okText: "Save",
+      okText: "OK",
       onCancel: () =>
         setModalProps({
           open: false,
@@ -148,9 +205,20 @@ const Users = () => {
     <Row className="user-wrapper" gutter={[16, 16]}>
       <Modal {...modalProps}></Modal>
       <Col xs={24}>
+        <Button type="primary" onClick={handleAddUser}>
+          Add User
+        </Button>
+      </Col>
+      <Col xs={24}>
         <Space>
-          <Button type="primary" onClick={handleAddUser}>
-            Add User
+          <Input
+            placeholder="Search users"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: 200 }}
+          />
+          <Button type="primary" onClick={() => fetchUsers(searchTerm)}>
+            Search
           </Button>
         </Space>
       </Col>
