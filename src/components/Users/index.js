@@ -18,17 +18,8 @@ import UserEdit from "./UserEdit";
 import axios from "axios";
 
 const Users = () => {
-  const [dataSource, setDataSource] = React.useState([
-    {
-      key: "1",
-      id: 1,
-      name: "John",
-      phone: "123456789",
-      age: 32,
-      address: "New York No. 1 Lake Park",
-    },
-  ]);
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [dataSource, setDataSource] = React.useState([]);
+  const [searchText, setSearchText] = React.useState("");
   const [editingRecord, setEditingRecord] = React.useState(null);
 
   const [modalProps, setModalProps] = React.useState({});
@@ -114,12 +105,8 @@ const Users = () => {
   };
 
   const handleSearch = () => {
-    fetchUsers(searchTerm);
+    fetchUsers(searchText);
   };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
 
   const handleAddUser = () => {
     setModalProps({
@@ -173,11 +160,11 @@ const Users = () => {
         const response = await axios.delete(
           `http://localhost:8080/users/${record.id}`
         );
-        console.log("response", response);
         const status = response.status;
         if (status === 200) {
           message.success("Delete successfully");
           fetchUsers();
+          setSearchText("");
         } else {
           message.error("Delete failed");
         }
@@ -201,6 +188,10 @@ const Users = () => {
     });
   };
 
+  useEffect(() => {
+    fetchUsers("");
+  }, []);
+
   return (
     <Row className="user-wrapper" gutter={[16, 16]}>
       <Modal {...modalProps}></Modal>
@@ -213,11 +204,11 @@ const Users = () => {
         <Space>
           <Input
             placeholder="Search users"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
             style={{ width: 200 }}
           />
-          <Button type="primary" onClick={() => fetchUsers(searchTerm)}>
+          <Button type="primary" onClick={handleSearch}>
             Search
           </Button>
         </Space>
