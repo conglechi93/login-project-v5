@@ -9,6 +9,7 @@ import {
   Space,
   Table,
   Input,
+  Form,
 } from "antd";
 import React, { useEffect } from "react";
 import "./user.css";
@@ -16,8 +17,11 @@ import UserDelete from "./UserDelete";
 import UserViewDetail from "./UserViewDetail";
 import UserEdit from "./UserEdit";
 import axios from "axios";
+import UserAddAndUpdate from "./UserAddAndUpdate";
 
 const Users = () => {
+  const [form] = Form.useForm();
+  const [loading, setLoading] = React.useState(false);
   const [dataSource, setDataSource] = React.useState([]);
   const [searchText, setSearchText] = React.useState("");
   const [editingRecord, setEditingRecord] = React.useState(null);
@@ -82,12 +86,12 @@ const Users = () => {
   ];
   const fetchUsers = async (search = "") => {
     try {
+      setLoading(true);
       const response = await axios.get("http://localhost:8080/users", {
         params: {
           search: search,
         },
       });
-      console.log(response.data);
 
       const data = response.data.map((user, index) => ({
         key: index + 1,
@@ -102,6 +106,7 @@ const Users = () => {
     } catch (error) {
       console.error("Error fetching users:", error);
     }
+    setLoading(false);
   };
 
   const handleSearch = () => {
@@ -113,11 +118,27 @@ const Users = () => {
       open: true,
       title: "Add User",
       onCancel: () => {
+        form.resetFields();
         setModalProps({
           open: false,
         });
       },
-      children: <div> hello </div>,
+      children: <UserAddAndUpdate form={form} record={null} />,
+      onOk: async () => {
+        const data = form.getFieldsValue();
+        const response = await axios.post("http://localhost:8080/users", data);
+        const status = response.status;
+        if (status === 200) {
+          message.success("Add successfully");
+          fetchUsers("");
+          setSearchText("");
+          setModalProps({
+            open: false,
+          });
+        } else {
+          message.error("Add failed");
+        }
+      },
     });
   };
 
@@ -131,19 +152,26 @@ const Users = () => {
         setModalProps({
           open: false,
         }),
-      onOk: () => {
-        const updatedData = dataSource.map((user) =>
-          user.key === record.key ? { ...user, ...editingRecord } : user
+      onOk: async () => {
+        const data = form.getFieldsValue();
+        const id = record.id;
+        const response = await axios.put(
+          `http://localhost:8080/users/${id}`,
+          data
         );
-        setDataSource(updatedData);
-        setModalProps({ open: false });
+        const status = response.status;
+        if (status === 200) {
+          message.success("Edit successfully");
+          fetchUsers("");
+          setSearchText("");
+          setModalProps({
+            open: false,
+          });
+        } else {
+          message.error("Edit failed");
+        }
       },
-      children: (
-        <UserEdit
-          record={record}
-          onChange={(newRecord) => setEditingRecord(newRecord)}
-        />
-      ),
+      children: <UserAddAndUpdate form={form} record={record} />,
     });
   };
   const handleDeleteUser = (record) => {
@@ -194,7 +222,7 @@ const Users = () => {
 
   return (
     <Row className="user-wrapper" gutter={[16, 16]}>
-      <Modal {...modalProps}></Modal>
+      <Modal {...modalProps} centered></Modal>
       <Col xs={24}>
         <Button type="primary" onClick={handleAddUser}>
           Add User
@@ -214,7 +242,7 @@ const Users = () => {
         </Space>
       </Col>
       <Col xs={24}>
-        <Table dataSource={dataSource} columns={columns} />
+        <Table loading={loading} dataSource={dataSource} columns={columns} />
       </Col>
     </Row>
   );
