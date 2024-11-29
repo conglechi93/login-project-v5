@@ -2,6 +2,7 @@ import anh2 from "../../image/anh2.png";
 import { Divider, Checkbox, Button, Form, Input } from "antd";
 import React from "react";
 import { BorderInnerOutlined } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 const MyFormItemContext = React.createContext([]);
 
 function toArr(str) {
@@ -26,11 +27,19 @@ const MyFormItem = ({ name, ...props }) => {
   return <Form.Item name={concatName} {...props} />;
 };
 // Định nghĩa hàm onFinish
-const onFinish = (values) => {
-  console.log("Form values:", values);
-  // Xử lý logic sau khi form được submit ở đây
-};
+
 const LoginContent = ({ handleChangeToRegister }) => {
+  const navigate = useNavigate();
+  const onFinish = (values) => {
+    console.log("Form values:", values);
+    // Xử lý logic sau khi form được submit ở đây
+    // B1: Lấy giá trị người dùng nhập (email, password)
+    // B2: Call API đăng nhập
+    // B3: Lấy response để xử lý.
+    // + Nếu status == 200 => chuyển sang /users route
+    // + Ngược lại => báo lỗi
+    navigate("/users");
+  };
   return (
     <div className="login-content">
       <div className="outlined">
