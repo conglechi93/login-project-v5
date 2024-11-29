@@ -9,6 +9,7 @@ import {
   Space,
   Table,
   Input,
+  Form,
 } from "antd";
 import React, { useEffect } from "react";
 import "./user.css";
@@ -16,6 +17,7 @@ import UserDelete from "./UserDelete";
 import UserViewDetail from "./UserViewDetail";
 import UserEdit from "./UserEdit";
 import axios from "axios";
+import UserAddAndUpdate from "./UserAddAndUpdate";
 
 const Users = () => {
   const [dataSource, setDataSource] = React.useState([
@@ -28,9 +30,10 @@ const Users = () => {
       address: "New York No. 1 Lake Park",
     },
   ]);
-  const [searchTerm, setSearchTerm] = React.useState("");
+  const [form] = Form.useForm();
+  const [searchText, setSearchText] = React.useState("");
   const [editingRecord, setEditingRecord] = React.useState(null);
-
+  const [loading, setLoading] = React.useState(false);
   const [modalProps, setModalProps] = React.useState({});
 
   const columns = [
@@ -91,6 +94,7 @@ const Users = () => {
   ];
   const fetchUsers = async (search = "") => {
     try {
+      setLoading(true);
       const response = await axios.get("http://localhost:8080/users", {
         params: {
           search: search,
@@ -111,10 +115,11 @@ const Users = () => {
     } catch (error) {
       console.error("Error fetching users:", error);
     }
+    setLoading(false);
   };
 
   const handleSearch = () => {
-    fetchUsers(searchTerm);
+    fetchUsers(searchText);
   };
 
   useEffect(() => {
@@ -126,11 +131,26 @@ const Users = () => {
       open: true,
       title: "Add User",
       onCancel: () => {
+        form.resetFields();
         setModalProps({
           open: false,
         });
       },
-      children: <div> hello </div>,
+      children: <UserAddAndUpdate form={form} record={null} />,
+      onOk: async () => {
+        const data = form.getFieldsValue();
+        const response = await axios.post("http://localhost:8080/users", data);
+        console.log("response", response);
+        const status = response.status;
+        if (status === 200) {
+          message.success("Add successfully");
+          fetchUsers();
+          setSearchText("");
+          setModalProps({ open: false });
+        } else {
+          message.error("Add failed");
+        }
+      },
     });
   };
 
@@ -144,19 +164,27 @@ const Users = () => {
         setModalProps({
           open: false,
         }),
-      onOk: () => {
-        const updatedData = dataSource.map((user) =>
-          user.key === record.key ? { ...user, ...editingRecord } : user
+      onOk: async () => {
+        const data = form.getFieldsValue();
+        const id = record.id;
+        const response = await axios.put(
+          `http://localhost:8080/users/${id}`,
+          data
         );
-        setDataSource(updatedData);
-        setModalProps({ open: false });
+        console.log("response", response);
+        const status = response.status;
+        if (status === 200) {
+          message.success("Edit successfully");
+          fetchUsers("");
+          setSearchText("");
+          setModalProps({
+            open: false,
+          });
+        } else {
+          message.error("Edit failed");
+        }
       },
-      children: (
-        <UserEdit
-          record={record}
-          onChange={(newRecord) => setEditingRecord(newRecord)}
-        />
-      ),
+      children: <UserAddAndUpdate form={form} record={record} />,
     });
   };
   const handleDeleteUser = (record) => {
@@ -178,6 +206,7 @@ const Users = () => {
         if (status === 200) {
           message.success("Delete successfully");
           fetchUsers();
+          setSearchText("");
         } else {
           message.error("Delete failed");
         }
@@ -213,17 +242,17 @@ const Users = () => {
         <Space>
           <Input
             placeholder="Search users"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
             style={{ width: 200 }}
           />
-          <Button type="primary" onClick={() => fetchUsers(searchTerm)}>
+          <Button type="primary" onClick={() => fetchUsers(searchText)}>
             Search
           </Button>
         </Space>
       </Col>
       <Col xs={24}>
-        <Table dataSource={dataSource} columns={columns} />
+        <Table loading={loading} dataSource={dataSource} columns={columns} />
       </Col>
     </Row>
   );

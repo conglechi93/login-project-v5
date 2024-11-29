@@ -8,33 +8,26 @@ import "./components/Registered/Registered.css";
 import LoginContent from "./components/LoginContent/Login";
 import "./components/LoginContent/Login.css";
 import Users from "./components/Users";
+import Sidebar from "./components/Sidebar";
+import Dashboard from "./components/Dashboard";
+import { Route, Routes } from "react-router-dom";
+import { Col, Row } from "antd";
+import NotFounds from "./components/NotFounds";
+
 function App() {
-  const [isLoginPage, setIsLoginPage] = React.useState(true);
-  const handleChangeToRegister = () => {
-    setIsLoginPage(false);
-  };
-  const handleChangeToLogin = () => {
-    console.log("Change to login");
-    setIsLoginPage(true);
-  };
-
-  return <Users />;
-
   return (
-    <div className="content">
-      <div className="container">
-        <div className="left-wrapper">
-          <LeftContent />
-        </div>
-        <div className="right-wrapper">
-          {isLoginPage ? (
-            <LoginContent handleChangeToRegister={handleChangeToRegister} />
-          ) : (
-            <Register handleChangeToLogin={handleChangeToLogin} />
-          )}
-        </div>
-      </div>
-    </div>
+    <Row>
+      <Col xs={4}>
+        <Sidebar />
+      </Col>
+      <Col xs={20}>
+        <Routes>
+          <Route path="/" element={<Dashboard />} />
+          <Route path="/users" element={<Users />} />
+          <Route path="*" element={<NotFounds />} />
+        </Routes>
+      </Col>
+    </Row>
   );
 }
 
